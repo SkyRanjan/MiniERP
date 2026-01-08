@@ -1,2 +1,4 @@
-
-sss
+Fastapi
+uvicorn
+pyndantic
+sqlalchemy
