@@ -30,3 +30,9 @@ class Purchase(Base):
     product_id = Column(Integer)
     vendor_id = Column(Integer)
     quantity = Column(Integer)
+
+class Sale(Base):
+    __tablename__ = "sale"
+    id=Column(Integer, primary_key=True)
+    product_id=Column(Integer)
+    quantity=Column(Integer)

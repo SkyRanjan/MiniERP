@@ -2,6 +2,12 @@ from fastapi import FastAPI
 from .database import engine
 from . import models
 from .vendor import router as vendor_router
+from .product import router as product_router
+from .purchase import router as purchase_router
+from .report import router as report_router
+from .inventory import router as inventory_router
+from .sale import router as sale_router
+
 
 app = FastAPI(title="Inventory Management System")
 
@@ -12,11 +18,17 @@ def root():
     return {"message": "Inventory System Running"}
 
 app.include_router(vendor_router)
+app.include_router(product_router)
+app.include_router(purchase_router)
+app.include_router(report_router)
+app.include_router(inventory_router)
+app.include_router(sale_router)
 
 import os
 import json
 from .database import SessionLocal
 from .models import Vendor, Product, Inventory, Purchase
+import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BACKUP_FILE = os.path.join(BASE_DIR, "backup", "backup.json")
@@ -24,9 +36,9 @@ BACKUP_FILE = os.path.join(BASE_DIR, "backup", "backup.json")
 
 @app.post("/backup")
 def backup_data():
-    db = SessionLocal()
+    db=SessionLocal()
 
-    data = {
+    data={
         "vendors": [
             {"id": v.id, "name": v.name, "phone": v.phone}
             for v in db.query(Vendor).all()
@@ -41,7 +53,10 @@ def backup_data():
             for p in db.query(Product).all()
         ],
         "inventory": [
-            {"product_id": i.product_id, "quantity": i.quantity}
+            {
+                "product_id": i.product_id,
+                "quantity": i.quantity
+            }
             for i in db.query(Inventory).all()
         ],
         "purchases": [
@@ -58,20 +73,18 @@ def backup_data():
 
     with open(BACKUP_FILE, "w") as f:
         json.dump(data, f, indent=4)
-
+    
     return {"message": "Backup created successfully"}
+
 
 
 @app.post("/restore")
 def restore_data():
-    if not os.path.exists(BACKUP_FILE):
-        return {"error": "Backup file not found. Run /backup first."}
-
-    db = SessionLocal()
+    db=SessionLocal()
 
     with open(BACKUP_FILE, "r") as f:
-        data = json.load(f)
-
+        data=json.load(f)
+    
     db.query(Vendor).delete()
     db.query(Product).delete()
     db.query(Inventory).delete()
@@ -83,13 +96,13 @@ def restore_data():
 
     for p in data["products"]:
         db.add(Product(**p))
-
+    
     for i in data["inventory"]:
         db.add(Inventory(**i))
-
+    
     for pr in data["purchases"]:
         db.add(Purchase(**pr))
-
+    
     db.commit()
 
-    return {"message": "Data restored successfully"}
+    return {"message": "Data restoration successful"}
