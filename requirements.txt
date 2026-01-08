@@ -1,5 +1,2 @@
-Fastapi
-uvicorn
-pyndantic
-sqlalchemy
+
 sss
