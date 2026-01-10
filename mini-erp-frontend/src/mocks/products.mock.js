@@ -1,4 +1,4 @@
-export const productsMock = [
+export let productsMock = [
   {
     product_id: 1,
     sku: "VID-001",

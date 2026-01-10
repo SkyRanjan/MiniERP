@@ -1,4 +1,4 @@
-export const vendorsMock = [
+export let vendorsMock = [
   {
     vendor_id: 1,
     name: "tech corp",
