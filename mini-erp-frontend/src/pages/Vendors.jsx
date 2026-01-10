@@ -5,11 +5,14 @@ import { canAddVendor } from "../utils/permissions";
 import Modal from "../components/Modal";
 import AddVendorForm from "../components/AddVendorForm";
 import { getVendors, addVendor } from "../services/vendors.service";
+import { ROLES } from "../constants/roles";
+import EditVendorForm from "../components/EditVendorForm";
 
 export default function Vendors() {
   const [vendors, setVendors] = useState([]);
   const { user } = useAuth();
   const [showModal, setShowModal] = useState(false);
+  const [editVendor, setEditVendor] = useState(null);
 
   useEffect(() => {
     getVendors().then(setVendors);
@@ -38,6 +41,22 @@ export default function Vendors() {
           />
         </Modal>
       )}
+      {editVendor && (
+          <Modal title="Edit Vendor" onClose={() => setEditVendor(null)}>
+            <EditVendorForm
+              vendor={editVendor}
+              onSave={(updated) => {
+                setVendors(prev =>
+                  prev.map(v =>
+                    v.vendor_id === updated.vendor_id ? updated : v
+                  )
+                );
+                setEditVendor(null);
+              }}
+              onCancel={() => setEditVendor(null)}
+            />
+          </Modal>
+        )}
 
       <div className="grid grid-cols-3 gap-4">
         {vendors.map(v => (
@@ -46,6 +65,25 @@ export default function Vendors() {
             <p>{v.contact}</p>
             <p>{v.email}</p>
             <p>{v.phone}</p>
+            {user.role === ROLES.ADMIN && (
+            <div className="mt-2 space-x-2">
+              <button
+                onClick={() => setEditVendor(v)}
+                className="text-blue-600 hover:underline"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() =>
+                  setVendors(prev => prev.filter(x => x.vendor_id !== v.vendor_id))
+                }
+                className="text-red-600 hover:underline"
+              >
+                Delete
+              </button>
+            </div>
+          )}
+
           </div>
         ))}
       </div>

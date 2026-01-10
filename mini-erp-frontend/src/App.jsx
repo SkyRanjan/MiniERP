@@ -64,20 +64,52 @@ import Dashboard from "./pages/Dashboard";
 import Inventory from "./pages/Inventory";
 import Vendors from "./pages/Vendors";
 import Reports from "./pages/Reports";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { ROLES } from "./constants/roles";
 
+// export default function App() {
+//   return (
+//     <BrowserRouter>
+//       <div className="flex">
+//         <Sidebar />
+//         <div className="p-6 w-full">
+//           <Routes>
+//             <Route path="/" element={<Dashboard />} />
+//             <Route path="/inventory" element={<Inventory />} />
+//             <Route path="/vendors" element={<Vendors />} />
+//             <Route path="/reports" element={<Reports />} />
+//           </Routes>
+//         </div>
+//       </div>
+//     </BrowserRouter>
+//   );
+// }
 export default function App() {
   return (
     <BrowserRouter>
-      <div className="flex">
+      <div className="flex min-h-screen bg-gray-100">
         <Sidebar />
-        <div className="p-6 w-full">
+        <main className="flex-1 p-6">
           <Routes>
+
+            {/* Public / shared routes */}
             <Route path="/" element={<Dashboard />} />
             <Route path="/inventory" element={<Inventory />} />
-            <Route path="/vendors" element={<Vendors />} />
+
+            {/* ADMIN-only routes */}
+            <Route
+              path="/vendors"
+              element={
+                <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+                  <Vendors />
+                </ProtectedRoute>
+              }
+            />
+
             <Route path="/reports" element={<Reports />} />
+
           </Routes>
-        </div>
+        </main>
       </div>
     </BrowserRouter>
   );

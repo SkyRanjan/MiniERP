@@ -42,16 +42,21 @@ import { useEffect, useState } from "react";
 // import { getProducts } from "../services/products.service";
 import Table from "../components/Table";
 import { useAuth } from "../context/AuthContext";
-import { canAddProduct } from "../utils/permissions";
+import { canAddProduct, canUpdateStock } from "../utils/permissions";
 import Modal from "../components/Modal";
 import AddProductForm from "../components/AddProductForm";
 import { addProduct, getProducts } from "../services/products.service";
+import UpdateStockForm from "../components/UpdateStockForm";
+import EditProductForm from "../components/EditProductForm";
+import { ROLES } from "../constants/roles";
 
 export default function Inventory() {
   const [products, setProducts] = useState([]);
   const { user } = useAuth();
   const [showModal, setShowModal] = useState(false);
-
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showStockModal, setShowStockModal] = useState(false);
+  const [editProduct, setEditProduct] = useState(null);
   useEffect(() => {
     getProducts().then(setProducts);
   }, []);
@@ -67,7 +72,7 @@ export default function Inventory() {
             + Add Product
           </button>
         )}
-
+      
       {showModal && (
         <Modal title="Add Product" onClose={() => setShowModal(false)}>
           <AddProductForm
@@ -80,7 +85,51 @@ export default function Inventory() {
           />
         </Modal>
       )}
-      <Table headers={["SKU", "Name", "Vendor", "Price", "Stock", "Status"]}>
+      {showStockModal && selectedProduct && (
+        <Modal title="Update Stock" onClose={() => setShowStockModal(false)}>
+          <UpdateStockForm
+            product={selectedProduct}
+            onSave={(newStock) => {
+                setProducts((prev) => //await api.put(`/products/${id}/stock`, { stock: newStock });
+                  prev.map((p) =>
+                    p.product_id === selectedProduct.product_id
+                      ? {
+                          ...p,
+                          stock: newStock,
+                          status: newStock < 10 ? "LOW_STOCK" : "IN_STOCK",
+                        }
+                      : p
+                  )
+                );
+                setShowStockModal(false);
+              }}
+              onCancel={() => setShowStockModal(false)}
+            />
+          </Modal>
+        )}
+      {editProduct && (
+          <Modal title="Edit Product" onClose={() => setEditProduct(null)}>
+            <EditProductForm
+              product={editProduct}
+              onSave={(updated) => {
+                setProducts(prev =>
+                  prev.map(p =>
+                    p.product_id === updated.product_id
+                      ? {
+                          ...updated,
+                          status: updated.stock < 10 ? "LOW_STOCK" : "IN_STOCK",
+                        }
+                      : p
+                  )
+                );
+                setEditProduct(null);
+              }}
+              onCancel={() => setEditProduct(null)}
+            />
+          </Modal>
+        )}
+
+      <Table headers={["SKU", "Name", "Vendor", "Price", "Stock", "Status", "Actions"]}>
         {products.map(p => (
           <tr key={p.product_id} className="text-center border-t">
             <td>{p.sku}</td>
@@ -91,6 +140,41 @@ export default function Inventory() {
             <td className={p.status === "LOW_STOCK" ? "text-red-500" : "text-green-600"}>
               {p.status}
             </td>
+            <td>
+              {canUpdateStock(user.role) && (
+                <button
+                  onClick={() => {
+                    setSelectedProduct(p);
+                    setShowStockModal(true);
+                  }}
+                  className="text-blue-600 hover:underline"
+                >
+                  Update Stock
+                </button>
+              )}
+            </td>
+              <td className="space-x-2">
+                {user.role === ROLES.ADMIN && (
+                  <>
+                    <button
+                      onClick={() => setEditProduct(p)}
+                      className="text-blue-600 hover:underline"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        setProducts(prev => prev.filter(x => x.product_id !== p.product_id))
+                      }
+                      className="text-red-600 hover:underline"
+                    >
+                      Delete
+                    </button>
+                  </>
+                )}
+              </td>
+
           </tr>
         ))}
       </Table>
