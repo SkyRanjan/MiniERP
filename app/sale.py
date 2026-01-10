@@ -6,6 +6,11 @@ router=APIRouter()
 
 @router.post("/sale")
 def sell_product(product_id: int, quantity: int):
+    if quantity<=0:
+        raise HTTPException(
+            status_code=400,
+            detial="Sale quantity must be greater than 0"
+        )
     db=SessionLocal()
 
     inventory = db.query(Inventory).filter(
