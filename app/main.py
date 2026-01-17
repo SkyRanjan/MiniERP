@@ -1,5 +1,5 @@
-from fastapi import FastAPI
-from .database import engine
+from fastapi import FastAPI, HTTPException
+from .database import engine, SessionLocal
 from . import models
 from .vendor import router as vendor_router
 from .product import router as product_router
@@ -7,7 +7,10 @@ from .purchase import router as purchase_router
 from .report import router as report_router
 from .inventory import router as inventory_router
 from .sale import router as sale_router
-
+from .account import router as account_router
+from .models import Vendor, Product, Inventory, Purchase, Sale, Account
+import os
+import json
 
 app = FastAPI(title="Inventory Management System")
 
@@ -17,6 +20,8 @@ models.Base.metadata.create_all(bind=engine)
 def root():
     return {"message": "Inventory System Running"}
 
+# Routers
+app.include_router(account_router)
 app.include_router(vendor_router)
 app.include_router(product_router)
 app.include_router(purchase_router)
@@ -24,21 +29,16 @@ app.include_router(report_router)
 app.include_router(inventory_router)
 app.include_router(sale_router)
 
-import os
-import json
-from .database import SessionLocal
-from .models import Vendor, Product, Inventory, Purchase
-import os
-
+# Backup file path
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BACKUP_FILE = os.path.join(BASE_DIR, "backup", "backup.json")
 
 
 @app.post("/backup")
 def backup_data():
-    db=SessionLocal()
+    db = SessionLocal()
 
-    data={
+    data = {
         "vendors": [
             {"id": v.id, "name": v.name, "phone": v.phone}
             for v in db.query(Vendor).all()
@@ -66,6 +66,20 @@ def backup_data():
                 "quantity": pr.quantity
             }
             for pr in db.query(Purchase).all()
+        ],
+        "sales": [
+            {
+                "product_id": s.product_id,
+                "quantity": s.quantity
+            }
+            for s in db.query(Sale).all()
+        ],
+        "account": [
+            {
+                "balance": a.balance,
+                "initialized": a.initialized
+            }
+            for a in db.query(Account).all()
         ]
     }
 
@@ -73,22 +87,29 @@ def backup_data():
 
     with open(BACKUP_FILE, "w") as f:
         json.dump(data, f, indent=4)
-    
-    return {"message": "Backup created successfully"}
 
+    return {"message": "Backup created successfully"}
 
 
 @app.post("/restore")
 def restore_data():
-    db=SessionLocal()
+    if not os.path.exists(BACKUP_FILE):
+        raise HTTPException(
+            status_code=400,
+            detail="Backup file not found. Run /backup first."
+        )
+
+    db = SessionLocal()
 
     with open(BACKUP_FILE, "r") as f:
-        data=json.load(f)
-    
+        data = json.load(f)
+
     db.query(Vendor).delete()
     db.query(Product).delete()
     db.query(Inventory).delete()
     db.query(Purchase).delete()
+    db.query(Sale).delete()
+    db.query(Account).delete()
     db.commit()
 
     for v in data["vendors"]:
@@ -96,13 +117,19 @@ def restore_data():
 
     for p in data["products"]:
         db.add(Product(**p))
-    
+
     for i in data["inventory"]:
         db.add(Inventory(**i))
-    
+
     for pr in data["purchases"]:
         db.add(Purchase(**pr))
-    
+
+    for s in data["sales"]:
+        db.add(Sale(**s))
+
+    for a in data["account"]:
+        db.add(Account(**a))
+
     db.commit()
 
     return {"message": "Data restoration successful"}

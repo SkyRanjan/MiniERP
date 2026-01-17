@@ -28,7 +28,7 @@ def get_vendors():
     db = SessionLocal()
     return db.query(Vendor).all()
 
-@router.delete("/vendors/vendor_id")
+@router.delete("/vendors/{vendor_id}")
 def delete_vendor(vendor_id: int):
     db=SessionLocal()
 

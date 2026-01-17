@@ -4,7 +4,7 @@ from .models import Inventory
 
 router=APIRouter()
 
-@router.get("/report/low-stock")
+@router.get("/reportl/low-stock")
 def low_stock():
     db=SessionLocal()
     return db.query(Inventory).filter(Inventory.quantity<10).all()
