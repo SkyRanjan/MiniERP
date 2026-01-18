@@ -1,11 +1,15 @@
 from fastapi import APIRouter, HTTPException
 from .database import SessionLocal
 from .models import Product, Inventory, Purchase, Vendor
+from .schemas import PurchaseCreate
 
 router = APIRouter()
 
 @router.post("/products")
-def add_product(name: str, price: float, vendor_id: int):
+def add_product(purchase: PurchaseCreate):
+    name=product.name
+    price = purchase.price
+    vendor_id = purchase.vendor_id
     if price <= 0:
         raise HTTPException(
             status_code=400,

@@ -1,11 +1,15 @@
 from fastapi import APIRouter, HTTPException
 from .database import SessionLocal
 from .models import Purchase, Inventory, Account, Product, Vendor
+from .schemas import PurchaseCreate
 
 router = APIRouter()
 
 @router.post("/purchase")
-def purchase_product(product_id: int, vendor_id: int, quantity: int):
+def purchase_product(purchase: PurchaseCreate):
+    product_id = purchase.product_id
+    vendor_id = purchase.vendor_id
+    quantity=purchase.quantity
 
     if quantity <= 0:
         raise HTTPException(

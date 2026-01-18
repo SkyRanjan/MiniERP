@@ -1,10 +1,13 @@
 from fastapi import APIRouter, HTTPException
 from .database import SessionLocal
 from .models import Account, Purchase, Product, Sale
+from .schemas import AccountInit
+
 router=APIRouter()
 
 @router.post("/account/initialize")
-def initialize_account(initial_balance: float):
+def initialize_account(data: AccountInit):
+    initial_balance= data.initial_balance
     if initial_balance < 0:
         raise HTTPException(
             status_code=400,
