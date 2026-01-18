@@ -1,22 +1,24 @@
 import { useState } from "react";
 
-export default function UpdateStockForm({ product, onSave, onCancel }) {
-  const [stock, setStock] = useState(product.stock ?? 0);
+export default function SellProductForm({ product, onSell, onCancel }) {
+  const [qty, setQty] = useState(1);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(Number(stock));
+    onSell(Number(qty));
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <p>Updating stock for <b>{product.name}</b></p>
+      <p>Selling: <b>{product.name}</b></p>
+      <p>Current Stock: {product.stock}</p>
 
       <input
         type="number"
-        value={stock}
-        onChange={(e) => setStock(e.target.value)}
+        value={qty}
+        onChange={(e) => setQty(e.target.value)}
         className="w-full border p-2"
+        min="1"
       />
 
       <div className="flex justify-end gap-2">
@@ -24,8 +26,8 @@ export default function UpdateStockForm({ product, onSave, onCancel }) {
           Cancel
         </button>
 
-        <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded">
-          Update Stock
+        <button type="submit" className="bg-red-600 text-white px-4 py-2 rounded">
+          Sell
         </button>
       </div>
     </form>

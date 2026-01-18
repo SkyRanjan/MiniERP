@@ -4,15 +4,15 @@ import { useAuth } from "../context/AuthContext";
 import { canAddVendor } from "../utils/permissions";
 import Modal from "../components/Modal";
 import AddVendorForm from "../components/AddVendorForm";
-import { getVendors, addVendor } from "../services/vendors.service";
+import { getVendors, addVendor , deleteVendor} from "../services/vendors.service";
 import { ROLES } from "../constants/roles";
-import EditVendorForm from "../components/EditVendorForm";
+// import EditVendorForm from "../components/EditVendorForm";
 
 export default function Vendors() {
   const [vendors, setVendors] = useState([]);
   const { user } = useAuth();
   const [showModal, setShowModal] = useState(false);
-  const [editVendor, setEditVendor] = useState(null);
+  // const [editVendor, setEditVendor] = useState(null);
 
   useEffect(() => {
     getVendors().then(setVendors);
@@ -41,7 +41,7 @@ export default function Vendors() {
           />
         </Modal>
       )}
-      {editVendor && (
+      {/* {editVendor && (
           <Modal title="Edit Vendor" onClose={() => setEditVendor(null)}>
             <EditVendorForm
               vendor={editVendor}
@@ -56,28 +56,29 @@ export default function Vendors() {
               onCancel={() => setEditVendor(null)}
             />
           </Modal>
-        )}
+        )} */}
 
       <div className="grid grid-cols-3 gap-4">
         {vendors.map(v => (
-          <div key={v.vendor_id} className="p-4 shadow rounded">
+            <div key={v.id} className="p-4 shadow rounded">
             <h3 className="font-bold">{v.name}</h3>
             <p>{v.contact}</p>
             <p>{v.email}</p>
             <p>{v.phone}</p>
             {user.role === ROLES.ADMIN && (
             <div className="mt-2 space-x-2">
-              <button
+              {/* <button
                 onClick={() => setEditVendor(v)}
                 className="text-blue-600 hover:underline"
               >
                 Edit
-              </button>
+              </button> */}
               <button
-                onClick={() =>
-                  setVendors(prev => prev.filter(x => x.vendor_id !== v.vendor_id))
-                }
-                className="text-red-600 hover:underline"
+                onClick={async () => {
+                  await deleteVendor(v.id);
+                  setVendors(await getVendors());
+                }}
+                className="text-red-600"
               >
                 Delete
               </button>
