@@ -1,0 +1,4 @@
+venv/
+MiniERP venv/
+__pycache__/
+*.pyc
