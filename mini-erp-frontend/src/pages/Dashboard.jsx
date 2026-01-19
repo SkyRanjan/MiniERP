@@ -1,32 +1,69 @@
-// const Dashboard = () => {
-//   return (
-//     <h1 className="text-2xl font-bold">Dashboard</h1>
-//   );
-// };
-
-// export default Dashboard;
 import { useEffect, useState } from "react";
-import { getDashboardSummary } from "../services/dashboard.service";
-import StatCard from "../components/StatCard";
+import { initializeAccount, getBalance, getProfitLoss } from "../services/dashboard.service";
 
 export default function Dashboard() {
-  const [data, setData] = useState(null);
+  const [balance, setBalance] = useState(null);
+  const [profit, setProfit] = useState(null);
+  const [initBalance, setInitBalance] = useState("");
+
+  const loadData = async () => {
+  try {
+    const bal = await getBalance();
+    setBalance(bal.balance || bal["current balance"]);
+
+    const pl = await getProfitLoss();
+    setProfit(pl["profit or loss"]);
+  } catch (err) {
+    console.log("Account not initialized yet");
+    setBalance(null);
+  }
+};
 
   useEffect(() => {
-    getDashboardSummary().then(setData);
+    loadData();
   }, []);
 
-  if (!data) return <p>Loading...</p>;
+  if (balance === null) {
+    return (
+      <div className="max-w-md mx-auto mt-20 p-6 border rounded shadow">
+        <h2 className="text-xl font-bold mb-4">Initialize Account</h2>
+        <input
+          type="number"
+          placeholder="Enter Opening Balance"
+          value={initBalance}
+          onChange={e => setInitBalance(e.target.value)}
+          className="w-full border p-2 mb-3"
+        />
+        <button
+          onClick={async () => {
+            try {
+              await initializeAccount(Number(initBalance));
+              loadData();
+            } catch (err) {
+              alert(err.response?.data?.detail || "Initialization failed");
+            }
+          }}
+          className="w-full bg-blue-600 text-white py-2 rounded"
+        >
+          Initialize
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <>
-      <h2 className="text-4xl text-red-500 font-bold">Dashboard</h2>
-
-      <div className="grid grid-cols-3 gap-4">
-        <StatCard title="Total Inventory" value={data.total_inventory} />
-        <StatCard title="Total Value" value={`$${data.total_value}`} />
-        <StatCard title="Low Stock Alerts" value={data.low_stock_count} danger />
+    <div className="p-6 grid grid-cols-2 gap-4">
+      <div className="bg-white p-4 rounded shadow">
+        <h3 className="text-gray-500">Current Balance</h3>
+        <p className="text-2xl font-bold text-green-600">₹ {balance}</p>
       </div>
-    </>
+
+      <div className="bg-white p-4 rounded shadow">
+        <h3 className="text-gray-500">Profit / Loss</h3>
+        <p className={`text-2xl font-bold ${profit >= 0 ? "text-green-600" : "text-red-600"}`}>
+          ₹ {profit}
+        </p>
+      </div>
+    </div>
   );
 }

@@ -72,3 +72,5 @@ export const sellProduct = async (product_id, quantity) => {
 
   return await api.post(`/sale?${params.toString()}`);
 };
+
+
