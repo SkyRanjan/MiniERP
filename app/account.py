@@ -1,19 +1,22 @@
-from fastapi import APIRouter, HTTPException
-from .database import SessionLocal
+from fastapi import APIRouter, Depends, HTTPException
+
+# from . import sale
+from .database import SessionLocal, get_db
 from .models import Account, Purchase, Product, Sale
 from .schemas import AccountInit
+from sqlalchemy.orm import Session
 
 router=APIRouter()
 
 @router.post("/account/initialize")
-def initialize_account(data: AccountInit):
+def initialize_account(data: AccountInit, db: Session = Depends(get_db)):
     initial_balance= data.initial_balance
     if initial_balance < 0:
         raise HTTPException(
             status_code=400,
             detail="Initial balance cannot be negative"
         )
-    db=SessionLocal()
+    
     account=db.query(Account).first()
     if account and account.initialized == 1:
         raise HTTPException(
@@ -37,8 +40,8 @@ def initialize_account(data: AccountInit):
     }
 
 @router.get("/account/profit-loss")
-def profit_loss():
-    db=SessionLocal()
+def profit_loss(db: Session = Depends(get_db)):
+    # db=SessionLocal()
 
     total_spent=0
     total_earned=0
@@ -52,7 +55,7 @@ def profit_loss():
     
     for s in sales:
         product=db.query(Product).filter(Product.id==s.product_id).first()
-        total_earned+=product.price*s.quantity
+        total_earned += s.selling_price*s.quantity
     
     return {
         "total spent": total_spent,
@@ -61,8 +64,7 @@ def profit_loss():
     }
 
 @router.get("/account/balance")
-def get_balance():
-    db=SessionLocal()
+def get_balance(db: Session = Depends(get_db)):
     account = db.query(Account).first()
     if not account or account.initialized == 0:
         raise HTTPException(

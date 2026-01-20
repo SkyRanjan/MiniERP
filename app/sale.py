@@ -1,12 +1,13 @@
-from fastapi import APIRouter, HTTPException
-from .database import SessionLocal
+from fastapi import APIRouter, Depends, HTTPException
+from .database import SessionLocal, get_db
 from .models import Sale, Inventory, Account, Product
 from .schemas import SaleCreate
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 
 @router.post("/sale")
-def sell_product(sale: SaleCreate):
+def sell_product(sale: SaleCreate, db: Session = Depends(get_db)):
     product_id=sale.product_id
     quantity=sale.quantity
 
@@ -17,7 +18,7 @@ def sell_product(sale: SaleCreate):
             detail="Sale quantity must be greater than 0"
         )
 
-    db = SessionLocal()
+    # db = SessionLocal()
 
     # 🔹 Account validation
     account = db.query(Account).first()
@@ -92,3 +93,7 @@ def sell_product(sale: SaleCreate):
         "amount_received": revenue,
         "current_balance": account.balance
     }
+
+@router.get("/sale")
+def get_sales(db: Session = Depends(get_db)):
+    return db.query(Sale).all()

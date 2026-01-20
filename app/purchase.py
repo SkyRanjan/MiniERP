@@ -1,12 +1,18 @@
-from fastapi import APIRouter, HTTPException
-from .database import SessionLocal
+from fastapi import APIRouter, Depends, HTTPException
+from .database import SessionLocal, get_db
 from .models import Purchase, Inventory, Account, Product, Vendor
 from .schemas import PurchaseCreate
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 
+@router.get("/purchase")
+def get_purchases(db: Session = Depends(get_db)):
+    # db = SessionLocal()
+    return db.query(Purchase).all()
+
 @router.post("/purchase")
-def purchase_product(purchase: PurchaseCreate):
+def purchase_product(purchase: PurchaseCreate, db: Session = Depends(get_db)):
     product_id = purchase.product_id
     vendor_id = purchase.vendor_id
     quantity=purchase.quantity

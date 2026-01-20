@@ -1,5 +1,5 @@
-from fastapi import FastAPI, HTTPException
-from .database import engine, SessionLocal
+from fastapi import Depends, FastAPI, HTTPException
+from .database import engine, SessionLocal, get_db
 from . import models
 from .vendor import router as vendor_router
 from .product import router as product_router
@@ -11,8 +11,19 @@ from .account import router as account_router
 from .models import Vendor, Product, Inventory, Purchase, Sale, Account
 import os
 import json
+from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
 
 app = FastAPI(title="Inventory Management System")
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -35,8 +46,7 @@ BACKUP_FILE = os.path.join(BASE_DIR, "backup", "backup.json")
 
 
 @app.post("/backup")
-def backup_data():
-    db = SessionLocal()
+def backup_data(db: Session = Depends(get_db)):
 
     data = {
         "vendors": [
@@ -93,14 +103,14 @@ def backup_data():
 
 
 @app.post("/restore")
-def restore_data():
+def restore_data(db: Session = Depends(get_db)):
     if not os.path.exists(BACKUP_FILE):
         raise HTTPException(
             status_code=400,
             detail="Backup file not found. Run /backup first."
         )
 
-    db = SessionLocal()
+    # db = SessionLocal()
 
     with open(BACKUP_FILE, "r") as f:
         data = json.load(f)
