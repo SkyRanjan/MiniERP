@@ -34,7 +34,6 @@ class Purchase(Base):
     product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
     vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=False)
     quantity = Column(Integer, nullable=False)
-    purchase_date = Column(DateTime, default=datetime.now(UTC), nullable=False)
 
 
 class Sale(Base):
@@ -43,8 +42,7 @@ class Sale(Base):
     id = Column(Integer, primary_key=True)
     product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
     quantity = Column(Integer, nullable=False)
-    sale_date = Column(DateTime, default=datetime.now(UTC), nullable=False)
-
+    selling_price=Column(Float, nullable=False)
 
 class Account(Base):
     __tablename__ = "account"

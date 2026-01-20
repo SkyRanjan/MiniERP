@@ -70,7 +70,8 @@ def backup_data():
         "sales": [
             {
                 "product_id": s.product_id,
-                "quantity": s.quantity
+                "quantity": s.quantity,
+                "selling_price": s.selling_price
             }
             for s in db.query(Sale).all()
         ],

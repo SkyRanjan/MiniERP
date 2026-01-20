@@ -1,15 +1,15 @@
 from fastapi import APIRouter, HTTPException
 from .database import SessionLocal
-from .models import Product, Inventory, Purchase, Vendor
-from .schemas import PurchaseCreate
+from .models import Product, Inventory, Purchase, Vendor, Sale
+from .schemas import ProductCreate
 
 router = APIRouter()
 
 @router.post("/products")
-def add_product(purchase: PurchaseCreate):
+def add_product(product: ProductCreate):
     name=product.name
-    price = purchase.price
-    vendor_id = purchase.vendor_id
+    price = product.price
+    vendor_id = product.vendor_id
     if price <= 0:
         raise HTTPException(
             status_code=400,
@@ -61,6 +61,10 @@ def delete_product(product_id: int):
 
     db.query(Purchase).filter(
         Purchase.product_id == product_id
+    ).delete()
+
+    db.query(Sale).filter(
+        Sale.product_id == product_id
     ).delete()
 
     db.delete(product)

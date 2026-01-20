@@ -17,6 +17,7 @@ class PurchaseCreate(BaseModel):
 class SaleCreate(BaseModel):
     product_id: int
     quantity: int
+    selling_price: float
 
 class AccountInit(BaseModel):
     initial_balance: float
