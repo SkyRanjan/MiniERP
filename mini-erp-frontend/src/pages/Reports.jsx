@@ -35,7 +35,7 @@ export default function Reports() {
             <th className="p-2 text-center border-r">Vendor</th>
             <th className="p-2 text-center border-r">Quantity</th>
             <th className="p-2 text-center border-r">Amount</th>
-            <th className="p-2 text-center">Date</th>
+            {/* <th className="p-2 text-center">Date</th> */}
           </tr>
         </thead>
 
@@ -54,7 +54,7 @@ export default function Reports() {
                 <td className="p-2 border-r font-semibold text-green-600">
                   ₹ {(product?.price || 0) * p.quantity}
                 </td>
-                <td className="p-2 text-gray-500">{p.date || "-"}</td>
+                {/* <td className="p-2 text-gray-500">{p.date || "-"}</td> */}
               </tr>
             );
           })}

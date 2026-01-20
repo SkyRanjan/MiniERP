@@ -15,10 +15,15 @@
 // };
 import api from "../api/axios";
 
-export const initializeAccount = async (balance) => {
-  return api.post("/account/initialize", null, {
-    params: { initial_balance: balance },
+/* =======================
+   ACCOUNT
+======================= */
+
+export const initializeAccount = async (initial_balance) => {
+  const res = await api.post("/account/initialize", {
+    initial_balance,
   });
+  return res.data;
 };
 
 export const getBalance = async () => {
@@ -30,3 +35,4 @@ export const getProfitLoss = async () => {
   const res = await api.get("/account/profit-loss");
   return res.data;
 };
+

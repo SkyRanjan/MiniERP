@@ -161,9 +161,9 @@ export default function Inventory() {
               <Modal title="Sell Product" onClose={() => setShowSellModal(false)}>
                 <SellProductForm
                   product={selectedProduct}
-                  onSell={async (qty) => {
-                    await sellProduct(selectedProduct.id, qty);
-
+                  onSell={async (payload) => {
+                    await sellProduct(payload);
+                    // loadData();
                     const updatedProducts = await getProducts();
                     const updatedInventory = await getInventory();
 

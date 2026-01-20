@@ -1,23 +1,8 @@
-// import { productsMock } from "../mocks/products.mock";
-
-// export const getProducts = async () => {
-//   return productsMock; // mock for now
-// };
-// export const addProduct = async (product) => {
-//   productsMock.push({ //await api.post("/products", product)
-//     ...product,
-//     product_id: Date.now(),
-//     status: product.stock < 10 ? "LOW_STOCK" : "IN_STOCK",
-//   });
-// };
-// replace only this file
-// import api from "../api/axios";
-
-// export const getProducts = async () => {
-//   const res = await api.get("/products");
-//   return res.data;
-// };
 import api from "../api/axios";
+
+/* =======================
+   PRODUCTS
+======================= */
 
 export const getProducts = async () => {
   const res = await api.get("/products");
@@ -25,38 +10,33 @@ export const getProducts = async () => {
 };
 
 export const addProduct = async (product) => {
-  const params = new URLSearchParams({
+  // Backend expects JSON body
+  // { name, price, vendor_id }
+  const res = await api.post("/products", {
     name: product.name,
     price: product.price,
     vendor_id: product.vendor_id,
   });
-
-  return await api.post(`/products?${params.toString()}`);
+  return res.data;
 };
 
 export const deleteProduct = async (id) => {
-  await api.delete(`/products/${id}`);
+  const res = await api.delete(`/products/${id}`);
+  return res.data;
 };
 
-// export const updateStock = async (id, stock) => {
-//   await api.post("/purchase", { product_id: id, quantity: stock });
-// };
-// export const updateStock = async (product_id, quantity) => {
-//   const params = new URLSearchParams({
-//     product_id,
-//     quantity,
-//   });
+/* =======================
+   INVENTORY / PURCHASE
+======================= */
 
-//   await api.post(`/purchase?${params.toString()}`);
-// };
 export const purchaseProduct = async (product_id, vendor_id, quantity) => {
-  const params = new URLSearchParams({
+  // Backend expects JSON body
+  const res = await api.post("/purchase", {
     product_id,
     vendor_id,
     quantity,
   });
-
-  return await api.post(`/purchase?${params.toString()}`);
+  return res.data;
 };
 
 export const getInventory = async () => {
@@ -64,13 +44,13 @@ export const getInventory = async () => {
   return res.data;
 };
 
-export const sellProduct = async (product_id, quantity) => {
-  const params = new URLSearchParams({
-    product_id,
-    quantity,
-  });
+/* =======================
+   SALES
+======================= */
 
-  return await api.post(`/sale?${params.toString()}`);
+// import api from "./axios";
+
+export const sellProduct = (payload) => {
+  return api.post("/sale", payload);
 };
-
 
