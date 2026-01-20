@@ -1,10 +1,11 @@
-from fastapi import APIRouter
-from .database import SessionLocal
+from fastapi import APIRouter, Depends
+from .database import SessionLocal, get_db
 from .models import Inventory
+from sqlalchemy.orm import Session
 
 router=APIRouter()
 
 @router.get("/inventory")
-def get_inventory():
+def get_inventory(db: Session = Depends(get_db)):
     db=SessionLocal()
     return db.query(Inventory).all()

@@ -11,8 +11,18 @@ from .account import router as account_router
 from .models import Vendor, Product, Inventory, Purchase, Sale, Account
 import os
 import json
+from fastapi.middleware.cors import CORSMiddleware
+
 
 app = FastAPI(title="Inventory Management System")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # your frontend dev server
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -82,7 +92,7 @@ def backup_data():
             for a in db.query(Account).all()
         ]
     }
-
+    db.close()
     os.makedirs(os.path.dirname(BACKUP_FILE), exist_ok=True)
 
     with open(BACKUP_FILE, "w") as f:
@@ -131,5 +141,5 @@ def restore_data():
         db.add(Account(**a))
 
     db.commit()
-
+    db.close()
     return {"message": "Data restoration successful"}

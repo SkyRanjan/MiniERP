@@ -7,4 +7,6 @@ router=APIRouter()
 @router.get("/reportl/low-stock")
 def low_stock():
     db=SessionLocal()
-    return db.query(Inventory).filter(Inventory.quantity<10).all()
+    data = db.query(Inventory).filter(Inventory.quantity<10).all()
+    db.close()
+    return data

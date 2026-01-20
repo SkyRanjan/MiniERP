@@ -21,12 +21,15 @@ def add_vendor(name: str, phone: str):
     vendor = Vendor(name=name, phone=phone)
     db.add(vendor)
     db.commit()
+    db.close()
     return {"message": "Vendor added"}
 
 @router.get("/vendors")
 def get_vendors():
     db = SessionLocal()
-    return db.query(Vendor).all()
+    data = db.query(Vendor).all()
+    db.close()
+    return data
 
 @router.delete("/vendors/{vendor_id}")
 def delete_vendor(vendor_id: int):
@@ -49,4 +52,5 @@ def delete_vendor(vendor_id: int):
     
     db.delete(vendor)
     db.commit()
+    db.close()
     return {"message": "Vendor and associated data deletion successful."}

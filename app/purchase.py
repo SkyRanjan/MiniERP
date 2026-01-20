@@ -1,11 +1,12 @@
-from fastapi import APIRouter, HTTPException
-from .database import SessionLocal
+from fastapi import APIRouter, Depends, HTTPException
+from .database import SessionLocal, get_db
 from .models import Purchase, Inventory, Account, Product, Vendor
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 
 @router.post("/purchase")
-def purchase_product(product_id: int, vendor_id: int, quantity: int):
+def purchase_product(product_id: int, vendor_id: int, quantity: int, db: Session = Depends(get_db)):
 
     if quantity <= 0:
         raise HTTPException(
@@ -13,7 +14,7 @@ def purchase_product(product_id: int, vendor_id: int, quantity: int):
             detail="Purchase quantity must be greater than 0"
         )
 
-    db = SessionLocal()
+    # db = SessionLocal()
 
     account = db.query(Account).first()
     if not account or account.initialized == 0:

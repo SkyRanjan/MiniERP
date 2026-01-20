@@ -66,8 +66,13 @@ def sell_product(product_id: int, quantity: int):
 
     db.commit()
 
+    current_balance = account.balance   # 🔹 store before closing
+
+    db.close()
+
     return {
         "message": "Sale completed successfully",
         "amount_received": total_income,
-        "current_balance": account.balance
+        "current_balance": current_balance
     }
+

@@ -1,10 +1,11 @@
-from fastapi import APIRouter, HTTPException
-from .database import SessionLocal
+from fastapi import APIRouter, Depends, HTTPException
+from .database import SessionLocal, get_db
 from .models import Account, Purchase, Product, Sale
+from sqlalchemy.orm import Session
 router=APIRouter()
 
 @router.post("/account/initialize")
-def initialize_account(initial_balance: float):
+def initialize_account(initial_balance: float, db: Session = Depends(get_db)):
     if initial_balance < 0:
         raise HTTPException(
             status_code=400,
@@ -34,7 +35,7 @@ def initialize_account(initial_balance: float):
     }
 
 @router.get("/account/profit-loss")
-def profit_loss():
+def profit_loss(db: Session = Depends(get_db)):
     db=SessionLocal()
 
     total_spent=0
@@ -43,13 +44,17 @@ def profit_loss():
     purchases=db.query(Purchase).all()
     sales=db.query(Sale).all()
 
-    for p in purchases:
-        product=db.query(Product).filter(Product.id == p.product_id).first()
-        total_spent += product.price * p.quantity
-    
     for s in sales:
-        product=db.query(Product).filter(Product.id==s.product_id).first()
-        total_earned+=product.price*s.quantity
+        product = db.query(Product).filter(Product.id == s.product_id).first()
+        if product:
+            total_earned += product.price * s.quantity
+
+    
+    for p in purchases:
+        product = db.query(Product).filter(Product.id == p.product_id).first()
+        if product:
+            total_spent += product.price * p.quantity
+
     
     return {
         "total spent": total_spent,
@@ -58,7 +63,7 @@ def profit_loss():
     }
 
 @router.get("/account/balance")
-def get_balance():
+def get_balance(db: Session = Depends(get_db)):
     db=SessionLocal()
     account = db.query(Account).first()
     if not account or account.initialized == 0:

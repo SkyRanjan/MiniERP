@@ -26,7 +26,7 @@ export default function Reports() {
   return (
     <div className="space-y-8">
 
-      <h2 className="text-2xl font-bold mb-3">Purchase Reports</h2>
+      <h2 className="text-2xl font-bold mb-3">Low Stock Reports</h2>
 
       <table className="w-full border rounded overflow-hidden shadow">
         <thead className="bg-blue-600 text-white">
@@ -62,7 +62,7 @@ export default function Reports() {
 
       </table>
 
-      <h2 className="text-2xl font-bold">Sales Reports</h2>
+      {/* <h2 className="text-2xl font-bold">Sales Reports</h2>
       <table className="w-full border">
         <thead>
           <tr>
@@ -80,7 +80,7 @@ export default function Reports() {
             </tr>
           ))}
         </tbody>
-      </table>
+      </table> */}
 
     </div>
   );
