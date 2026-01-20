@@ -4,6 +4,9 @@ class VendorCreate(BaseModel):
     name: str
     phone: str
 
+class VendorPhonePatch(BaseModel):
+    phone: str
+
 class ProductCreate(BaseModel):
     name: str
     price: float

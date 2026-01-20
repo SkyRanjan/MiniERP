@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from .database import SessionLocal
 from .models import Vendor, Product, Inventory, Purchase
 import re
-from .schemas import VendorCreate
+from .schemas import VendorCreate, VendorPhonePatch
 
 router = APIRouter()
 
@@ -53,3 +53,29 @@ def delete_vendor(vendor_id: int):
     db.delete(vendor)
     db.commit()
     return {"message": "Vendor and associated data deletion successful."}
+
+@router.patch("/vendors/{vendor_id}/phone")
+def update_vendor_phone(vendor_id: int, data: VendorPhonePatch):
+    db=SessionLocal()
+
+    vendor=db.query(Vendor).filter(
+        Vendor.id==vendor_id
+    ).first()
+
+    if not vendor:
+        raise HTTPException(
+            status_code=404,
+            detail="Vendor not found"
+        )
+    if not data.phone.isdigit() or data.phone.startswith("0"):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid phone number"
+        )
+    vendor.phone=data.phone
+    db.commit()
+    return{
+        "message": "Vendor phone number updated successfully",
+        "vendor_id": vendor_id,
+        "new_phone": data.phone
+    }
