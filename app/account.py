@@ -1,11 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
 from .database import SessionLocal, get_db
 from .models import Account, Purchase, Product, Sale
-from sqlalchemy.orm import Session
+from .schemas import AccountInit
+
 router=APIRouter()
 
 @router.post("/account/initialize")
-def initialize_account(initial_balance: float, db: Session = Depends(get_db)):
+def initialize_account(data: AccountInit):
+    initial_balance= data.initial_balance
     if initial_balance < 0:
         raise HTTPException(
             status_code=400,

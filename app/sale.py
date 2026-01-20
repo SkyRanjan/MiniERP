@@ -1,11 +1,14 @@
 from fastapi import APIRouter, HTTPException
 from .database import SessionLocal
 from .models import Sale, Inventory, Account, Product
+from .schemas import SaleCreate
 
 router = APIRouter()
 
 @router.post("/sale")
-def sell_product(product_id: int, quantity: int):
+def sell_product(sale: SaleCreate):
+    product_id=sale.product_id
+    quantity=sale.quantity
 
     # 🔹 Quantity validation
     if quantity <= 0:
@@ -49,20 +52,32 @@ def sell_product(product_id: int, quantity: int):
             status_code=400,
             detail="Insufficient stock"
         )
+    
+    account=db.query(Account).first()
+    if not account or account.initialized==0:
+        raise HTTPException(
+            status_code=400,
+            detail="Account not initialized"
+        )
+    
+    cost_price=product.price
+    selling_price=sale.selling_price
+    quantity=sale.quantity
+
+    revenue=selling_price*quantity
+    profit = (selling_price-cost_price)*quantity
 
     # 🔹 Record sale
-    sale = Sale(
+    sale_entry = Sale(
         product_id=product_id,
-        quantity=quantity
+        quantity=quantity,
+        selling_price=selling_price
     )
-    db.add(sale)
+    db.add(sale_entry)
 
     # 🔹 Update inventory
     inventory.quantity -= quantity
-
-    # 🔹 Update account balance
-    total_income = product.price * quantity
-    account.balance += total_income
+    account.balance += revenue
 
     db.commit()
 

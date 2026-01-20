@@ -1,8 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from .database import SessionLocal
 from .models import Product, Inventory, Purchase, Vendor
-# from pydantic import BaseModel
-
 
 router = APIRouter()
 # class ProductCreate(BaseModel):
@@ -10,7 +8,10 @@ router = APIRouter()
 #     price: float
 #     vendor_id: int
 @router.post("/products")
-def add_product(name: str, price: float, vendor_id: int):
+def add_product(product: ProductCreate):
+    name=product.name
+    price = product.price
+    vendor_id = product.vendor_id
     if price <= 0:
         raise HTTPException(
             status_code=400,
@@ -90,6 +91,10 @@ def delete_product(product_id: int):
 
     db.query(Purchase).filter(
         Purchase.product_id == product_id
+    ).delete()
+
+    db.query(Sale).filter(
+        Sale.product_id == product_id
     ).delete()
 
     db.delete(product)

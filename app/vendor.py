@@ -2,11 +2,14 @@ from fastapi import APIRouter, HTTPException
 from .database import SessionLocal
 from .models import Vendor, Product, Inventory, Purchase
 import re
+from .schemas import VendorCreate
 
 router = APIRouter()
 
 @router.post("/vendors")
-def add_vendor(name: str, phone: str):
+def add_vendor(vendor: VendorCreate):
+    name=vendor.name
+    phone=vendor.phone
     if not name.replace(" ", "").isalpha():
         raise HTTPException(
             status_code=400,
